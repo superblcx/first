@@ -1,10 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>543</title>
-  </head>
-  <body><b>继续努力</b></body>
-  <img src="本机照片\微信图片_20250117154407.jpg" alt="Smiley face" width="828" height="828">
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宿舍生活分享</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>宿舍生活动态</h1>
+        <nav>
+            <a href="gallery.html">照片墙</a>
+            <a href="#post-form">发动态</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="posts-container" class="posts"></div>
+
+        <section id="post-form" class="form-container">
+            <h2>发布新动态</h2>
+            <form id="new-post-form" enctype="multipart/form-data">
+                <textarea name="content" placeholder="分享你的宿舍生活..." required></textarea>
+                <input type="file" name="image" accept="image/*">
+                <button type="submit">发布</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // 加载并显示帖子
+        function loadPosts() {
+            fetch('posts.json')
+                .then(response => response.json())
+                .then(posts => {
+                    const container = document.getElementById('posts-container');
+                    container.innerHTML = posts.map((post, index) => `
+                        <article class="post">
+                            ${post.image ? `<img src="${post.image}" alt="动态图片">` : ''}
+                            <p>${post.content}</p>
+                            <div class="post-meta">
+                                <time>${post.timestamp}</time>
+                                <a href="post.html?post=${index}">查看详情</a>
+                            </div>
+                        </article>
+                    `).join('');
+                });
+        }
+
+        // 表单提交处理
+        document.getElementById('new-post-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('submit_post.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    loadPosts();
+                    this.reset();
+                }
+            });
+        });
+
+        // 初始加载
+        loadPosts();
+        setInterval(loadPosts, 5000); // 每5秒自动刷新
+    </script>
+</body>
 </html>
